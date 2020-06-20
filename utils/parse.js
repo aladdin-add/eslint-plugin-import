@@ -3,8 +3,32 @@ exports.__esModule = true;
 
 const moduleRequire = require('./module-require').default;
 const extname = require('path').extname;
+const fs = require('fs');
 
 const log = require('debug')('eslint-plugin-import:parse');
+
+function getBabelVisitorKeys(parserPath) {
+  const hypotheticalLocation = parserPath.replace('index.js', 'visitor-keys.js');
+  if (fs.existsSync(hypotheticalLocation)) {
+    const keys = moduleRequire(parserPath.replace('index.js', 'visitor-keys.js'));
+    return keys
+  } else {
+    return null
+  }
+}
+
+function keysFromParser(parserPath, parserInstance, parsedResult) {
+  if (/.*espree.*/.test(parserPath)) {
+    return parserInstance.VisitorKeys
+  } else if (/.*babel-eslint.*/.test(parserPath)) {
+    return getBabelVisitorKeys(parserPath)
+  } else if (/.*@typescript-eslint\/parser/.test(parserPath)) {
+    if (parsedResult) {
+      return parsedResult.visitorKeys
+    }
+  }
+  return null
+}
 
 exports.default = function parse(path, content, context) {
 
@@ -45,7 +69,12 @@ exports.default = function parse(path, content, context) {
   if (typeof parser.parseForESLint === 'function') {
     let ast;
     try {
-      ast = parser.parseForESLint(content, parserOptions).ast;
+      const parserRaw = parser.parseForESLint(content, parserOptions)
+      ast = parserRaw.ast
+      return {
+        ast,
+        visitorKeys: keysFromParser(parserPath, parser, parserRaw),
+      }
     } catch (e) {
       console.warn();
       console.warn('Error while parsing ' + parserOptions.filePath);
@@ -55,15 +84,24 @@ exports.default = function parse(path, content, context) {
       console.warn(
         '`parseForESLint` from parser `' +
           parserPath +
-          '` is invalid and will just be ignored'
+          '` is invalid and will just be ignored',
+        path
       );
     } else {
-      return ast;
+      return {
+        ast,
+        visitorKeys: keysFromParser(parserPath, parser, undefined),
+      }
     }
   }
 
-  return parser.parse(content, parserOptions);
-};
+  const keys = keysFromParser(parserPath, parser, undefined)
+  return {
+    ast: parser.parse(content, parserOptions),
+    visitorKeys: keys,
+  }
+}
+
 
 function getParserPath(path, context) {
   const parsers = context.settings['import/parsers'];
