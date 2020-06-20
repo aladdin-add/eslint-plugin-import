@@ -1,6 +1,8 @@
-import { test, testFilePath, getTSParsers } from '../utils';
-import jsxConfig from '../../../config/react';
-import typescriptConfig from '../../../config/typescript';
+import { test, testFilePath, getTSParsers } from '../utils'
+import jsxConfig from '../../../config/react'
+import typescriptConfig from '../../../config/typescript'
+import eslintPkg from 'eslint/package.json'
+import semver from 'semver'
 
 import { RuleTester } from 'eslint';
 import fs from 'fs';
@@ -208,54 +210,62 @@ ruleTester.run('no-unused-modules', rule, {
   ],
 });
 
-// test for unused exports with `import()`
-ruleTester.run('no-unused-modules', rule, {
-  valid: [
-    test({ options: unusedExportsOptions,
-           code: `
-           export const a = 10
-           export const b = 20
-           export const c = 30
-           const d = 40
-           export default d
-           `,
-           parser: require.resolve('babel-eslint'),
-           filename: testFilePath('./no-unused-modules/exports-for-dynamic-js.js')}),
-  ],
-  invalid: [
-    test({ options: unusedExportsOptions,
-      code: `
-      export const a = 10
-      export const b = 20
-      export const c = 30
-      const d = 40
-      export default d
-      `,
-      parser: require.resolve('babel-eslint'),
-      filename: testFilePath('./no-unused-modules/exports-for-dynamic-js-2.js'),
-      errors: [
-           error(`exported declaration 'a' not used within other modules`),
-           error(`exported declaration 'b' not used within other modules`),
-           error(`exported declaration 'c' not used within other modules`),
-           error(`exported declaration 'default' not used within other modules`),
-      ]}),
-  ],
-})
-typescriptRuleTester.run('no-unused-modules', rule, {
-  valid: [
-    test({ options: unusedExportsTypescriptOptions,
-           code: `
-           export const ts_a = 10
-           export const ts_b = 20
-           export const ts_c = 30
-           const ts_d = 40
-           export default ts_d
-           `,
-           parser: require.resolve('@typescript-eslint/parser'),
-           filename: testFilePath('./no-unused-modules/typescript/exports-for-dynamic-ts.ts')}),
-  ],
-  invalid: [
-  ],
+
+describe('dynamic imports', () => {
+  if (semver.satisfies(eslintPkg.version, '< 6')) {
+    this.skip()
+    return
+  }
+
+  // test for unused exports with `import()`
+  ruleTester.run('no-unused-modules', rule, {
+    valid: [
+      test({ options: unusedExportsOptions,
+            code: `
+            export const a = 10
+            export const b = 20
+            export const c = 30
+            const d = 40
+            export default d
+            `,
+            parser: require.resolve('babel-eslint'),
+            filename: testFilePath('./no-unused-modules/exports-for-dynamic-js.js')}),
+    ],
+    invalid: [
+      test({ options: unusedExportsOptions,
+        code: `
+        export const a = 10
+        export const b = 20
+        export const c = 30
+        const d = 40
+        export default d
+        `,
+        parser: require.resolve('babel-eslint'),
+        filename: testFilePath('./no-unused-modules/exports-for-dynamic-js-2.js'),
+        errors: [
+            error(`exported declaration 'a' not used within other modules`),
+            error(`exported declaration 'b' not used within other modules`),
+            error(`exported declaration 'c' not used within other modules`),
+            error(`exported declaration 'default' not used within other modules`),
+        ]}),
+    ],
+  })
+  typescriptRuleTester.run('no-unused-modules', rule, {
+    valid: [
+      test({ options: unusedExportsTypescriptOptions,
+            code: `
+            export const ts_a = 10
+            export const ts_b = 20
+            export const ts_c = 30
+            const ts_d = 40
+            export default ts_d
+            `,
+            parser: require.resolve('@typescript-eslint/parser'),
+            filename: testFilePath('./no-unused-modules/typescript/exports-for-dynamic-ts.ts')}),
+    ],
+    invalid: [
+    ],
+  })
 })
 
 // // test for export from
