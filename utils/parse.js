@@ -10,7 +10,7 @@ const log = require('debug')('eslint-plugin-import:parse');
 function getBabelVisitorKeys(parserPath) {
   const hypotheticalLocation = parserPath.replace('index.js', 'visitor-keys.js');
   if (fs.existsSync(hypotheticalLocation)) {
-    const keys = moduleRequire(parserPath.replace('index.js', 'visitor-keys.js'));
+    const keys = moduleRequire(hypotheticalLocation);
     return keys
   } else {
     return null
@@ -20,9 +20,11 @@ function getBabelVisitorKeys(parserPath) {
 function keysFromParser(parserPath, parserInstance, parsedResult) {
   if (/.*espree.*/.test(parserPath)) {
     return parserInstance.VisitorKeys
-  } else if (/.*babel-eslint.*/.test(parserPath)) {
+  }
+  if (/.*babel-eslint.*/.test(parserPath)) {
     return getBabelVisitorKeys(parserPath)
-  } else if (/.*@typescript-eslint\/parser/.test(parserPath)) {
+  }
+  if (/.*@typescript-eslint\/parser/.test(parserPath)) {
     if (parsedResult) {
       return parsedResult.visitorKeys
     }
@@ -84,8 +86,7 @@ exports.default = function parse(path, content, context) {
       console.warn(
         '`parseForESLint` from parser `' +
           parserPath +
-          '` is invalid and will just be ignored',
-        path
+          '` is invalid and will just be ignored'
       );
     } else {
       return {
