@@ -12,9 +12,8 @@ function getBabelVisitorKeys(parserPath) {
   if (fs.existsSync(hypotheticalLocation)) {
     const keys = moduleRequire(hypotheticalLocation);
     return keys
-  } else {
-    return null
   }
+  return null
 }
 
 function keysFromParser(parserPath, parserInstance, parsedResult) {
