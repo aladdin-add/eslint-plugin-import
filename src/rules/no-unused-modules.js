@@ -7,6 +7,7 @@
 import Exports, { recursivePatternCapture } from '../ExportMap';
 import { getFileExtensions } from 'eslint-module-utils/ignore';
 import resolve from 'eslint-module-utils/resolve';
+import visit from 'eslint-module-utils/visit';
 import docsUrl from '../docsUrl';
 import { dirname, join } from 'path';
 import readPkgUp from 'read-pkg-up';
@@ -663,6 +664,28 @@ module.exports = {
             oldImports.set(val, key);
           }
         });
+      });
+
+      function processDynamicImport(source) {
+        if (source.type !== 'Literal') {
+          return null;
+        }
+        const p = resolve(source.value, context);
+        if (p == null) {
+          return null;
+        }
+        newNamespaceImports.add(p);
+      }
+
+      visit(node, require('babel-eslint/lib/visitor-keys'), {
+        ImportExpression(child) {
+          processDynamicImport(child.source);
+        },
+        CallExpression(child) {
+          if (child.callee.type === 'Import') {
+            processDynamicImport(child.arguments[0]);
+          }
+        },
       });
 
       node.body.forEach(astNode => {
