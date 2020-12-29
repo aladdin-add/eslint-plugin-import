@@ -366,30 +366,36 @@ ExportMap.parse = function (path, content, context) {
 
   let hasDynamicImports = false;
 
+  function processDynamicImport(source) {
+    hasDynamicImports = true;
+    if (source.type !== 'Literal') {
+      return null;
+    }
+    const p = remotePath(source.value);
+    if (p == null) {
+      return null;
+    }
+    const importedSpecifiers = new Set();
+    importedSpecifiers.add('ImportNamespaceSpecifier');
+    const getter = thunkFor(p, context);
+    m.imports.set(p, {
+      getter,
+      source: {
+        // capturing actual node reference holds full AST in memory!
+        value: source.value,
+        loc: source.loc,
+      },
+      importedSpecifiers,
+    });
+  }
+
   visit(ast, visitorKeys, {
+    ImportExpression(node) {
+      processDynamicImport(node.source);
+    },
     CallExpression(node) {
       if (node.callee.type === 'Import') {
-        hasDynamicImports = true;
-        const firstArgument = node.arguments[0];
-        if (firstArgument.type !== 'Literal') {
-          return null;
-        }
-        const p = remotePath(firstArgument.value);
-        if (p == null) {
-          return null;
-        }
-        const importedSpecifiers = new Set();
-        importedSpecifiers.add('ImportNamespaceSpecifier');
-        const getter = thunkFor(p, context);
-        m.imports.set(p, {
-          getter,
-          source: {
-            // capturing actual node reference holds full AST in memory!
-            value: firstArgument.value,
-            loc: firstArgument.loc,
-          },
-          importedSpecifiers,
-        });
+        processDynamicImport(node.arguments[0]);
       }
     },
   });
