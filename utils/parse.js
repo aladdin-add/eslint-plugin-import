@@ -11,7 +11,7 @@ function getBabelVisitorKeys(parserPath) {
   const hypotheticalLocation = parserPath.replace('index.js', 'visitor-keys.js');
   if (fs.existsSync(hypotheticalLocation)) {
     const keys = moduleRequire(hypotheticalLocation);
-    return keys
+    return keys.default || keys
   }
   return null
 }
@@ -20,7 +20,7 @@ function keysFromParser(parserPath, parserInstance, parsedResult) {
   if (/.*espree.*/.test(parserPath)) {
     return parserInstance.VisitorKeys
   }
-  if (/.*babel-eslint.*/.test(parserPath)) {
+  if (/.*(babel-eslint|@babel\/eslint-parser).*/.test(parserPath)) {
     return getBabelVisitorKeys(parserPath)
   }
   if (/.*@typescript-eslint\/parser/.test(parserPath)) {

@@ -145,6 +145,8 @@ const importList = new Map();
  */
 const exportList = new Map();
 
+const visitorKeyMap = new Map();
+
 const ignoredFiles = new Set();
 const filesOutsideSrc = new Set();
 
@@ -184,8 +186,15 @@ const prepareImportsAndExports = (srcFiles, context) => {
     const imports = new Map();
     const currentExports = Exports.get(file, context);
     if (currentExports) {
-      const { dependencies, reexports, imports: localImportList, namespace  } = currentExports;
+      const {
+        dependencies,
+        reexports,
+        imports: localImportList,
+        namespace,
+        visitorKeys,
+      } = currentExports;
 
+      visitorKeyMap.set(file, visitorKeys);
       // dependencies === export * from
       const currentExportAll = new Set();
       dependencies.forEach(getDependency => {
@@ -677,7 +686,7 @@ module.exports = {
         newNamespaceImports.add(p);
       }
 
-      visit(node, require('babel-eslint/lib/visitor-keys'), {
+      visit(node, visitorKeyMap.get(file), {
         ImportExpression(child) {
           processDynamicImport(child.source);
         },
