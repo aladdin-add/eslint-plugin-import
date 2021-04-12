@@ -26,7 +26,7 @@
     "pretest": "linklocal",
     "posttest": "eslint .",
     "mocha": "cross-env BABEL_ENV=test nyc -s mocha",
-    "tests-only": "npm run mocha tests/src",
+    "tests-only": "node -v && npm -v && npm ls eslint espree acorn && npm run mocha tests/src",
     "test": "npm run tests-only",
     "test-compiled": "npm run prepublish && BABEL_ENV=testCompiled mocha --compilers js:babel-register tests/src",
     "test-all": "node --require babel-register ./scripts/testAll",
