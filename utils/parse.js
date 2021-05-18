@@ -8,27 +8,35 @@ const fs = require('fs');
 const log = require('debug')('eslint-plugin-import:parse');
 
 function getBabelVisitorKeys(parserPath) {
-  const hypotheticalLocation = parserPath.replace('index.js', 'visitor-keys.js');
-  if (fs.existsSync(hypotheticalLocation)) {
-    const keys = moduleRequire(hypotheticalLocation);
-    return keys.default || keys
+  if (parserPath.endsWith('index.js')) {
+    const hypotheticalLocation = parserPath.replace('index.js', 'visitor-keys.js');
+    if (fs.existsSync(hypotheticalLocation)) {
+      const keys = moduleRequire(hypotheticalLocation);
+      return keys.default || keys;
+    }
+  } else if (parserPath.endsWith('index.cjs')) {
+    const hypotheticalLocation = parserPath.replace('index.cjs', 'worker/ast-info.cjs');
+    if (fs.existsSync(hypotheticalLocation)) {
+      const astInfo = moduleRequire(hypotheticalLocation);
+      return astInfo.getVisitorKeys();
+    }
   }
-  return null
+  return null;
 }
 
 function keysFromParser(parserPath, parserInstance, parsedResult) {
   if (/.*espree.*/.test(parserPath)) {
-    return parserInstance.VisitorKeys
+    return parserInstance.VisitorKeys;
   }
   if (/.*(babel-eslint|@babel\/eslint-parser).*/.test(parserPath)) {
-    return getBabelVisitorKeys(parserPath)
+    return getBabelVisitorKeys(parserPath);
   }
   if (/.*@typescript-eslint\/parser/.test(parserPath)) {
     if (parsedResult) {
-      return parsedResult.visitorKeys
+      return parsedResult.visitorKeys;
     }
   }
-  return null
+  return null;
 }
 
 exports.default = function parse(path, content, context) {
@@ -70,12 +78,12 @@ exports.default = function parse(path, content, context) {
   if (typeof parser.parseForESLint === 'function') {
     let ast;
     try {
-      const parserRaw = parser.parseForESLint(content, parserOptions)
-      ast = parserRaw.ast
+      const parserRaw = parser.parseForESLint(content, parserOptions);
+      ast = parserRaw.ast;
       return {
         ast,
         visitorKeys: keysFromParser(parserPath, parser, parserRaw),
-      }
+      };
     } catch (e) {
       console.warn();
       console.warn('Error while parsing ' + parserOptions.filePath);
@@ -91,16 +99,16 @@ exports.default = function parse(path, content, context) {
       return {
         ast,
         visitorKeys: keysFromParser(parserPath, parser, undefined),
-      }
+      };
     }
   }
 
-  const keys = keysFromParser(parserPath, parser, undefined)
+  const keys = keysFromParser(parserPath, parser, undefined);
   return {
     ast: parser.parse(content, parserOptions),
     visitorKeys: keys,
-  }
-}
+  };
+};
 
 
 function getParserPath(path, context) {
