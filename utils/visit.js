@@ -1,24 +1,24 @@
-'use strict'
-exports.__esModule = true
+'use strict';
+exports.__esModule = true;
 
 exports.default = function visit(node, keys, visitorSpec) {
   if (!node || !keys) {
-    return
+    return;
   }
-  const type = node.type
+  const type = node.type;
   if (typeof visitorSpec[type] === 'function') {
-    visitorSpec[type](node)
+    visitorSpec[type](node);
   }
-  const childFields = keys[type]
+  const childFields = keys[type];
   if (!childFields) {
-    return
+    return;
   }
   childFields.forEach((fieldName) => {
     [].concat(node[fieldName]).forEach((item) => {
-      visit(item, keys, visitorSpec)
-    })
-  })
+      visit(item, keys, visitorSpec);
+    });
+  });
   if (typeof visitorSpec[`${type}:Exit`] === 'function') {
-    visitorSpec[`${type}:Exit`](node)
+    visitorSpec[`${type}:Exit`](node);
   }
-}
+};
