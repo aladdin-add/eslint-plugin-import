@@ -382,12 +382,14 @@ ExportMap.parse = function (path, content, context) {
     const getter = thunkFor(p, context);
     m.imports.set(p, {
       getter,
-      source: {
+      declarations: new Set([{
+        source: {
         // capturing actual node reference holds full AST in memory!
-        value: source.value,
-        loc: source.loc,
-      },
-      importedSpecifiers,
+          value: source.value,
+          loc: source.loc,
+        },
+        importedSpecifiers,
+      }]),
     });
   }
 
