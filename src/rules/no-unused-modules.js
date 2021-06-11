@@ -262,6 +262,7 @@ const prepareImportsAndExports = (srcFiles, context) => {
   });
   exportAll.forEach((value, key) => {
     value.forEach(val => {
+      if (val.includes('node_modules/')) return;
       const currentExports = exportList.get(val);
       const currentExport = currentExports.get(EXPORT_ALL_DECLARATION);
       currentExport.whereUsed.add(key);
