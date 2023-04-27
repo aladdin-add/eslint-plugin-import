@@ -36,7 +36,7 @@ describe('package', function () {
   });
 
   it('exports all configs', function (done) {
-    fs.readdir(path.join(process.cwd(), 'config'), function (err, files) {
+    fs.readdir(path.join(process.cwd(), 'eslintrc'), function (err, files) {
       if (err) { done(err); return; }
       files.filter(isJSFile).forEach((file) => {
         if (file[0] === '.') { return; }
