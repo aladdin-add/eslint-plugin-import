@@ -1,5 +1,5 @@
 import { getTSParsers, parsers, test, testFilePath } from '../utils';
-import typescriptConfig from '../../../config/typescript';
+import typescriptConfig from '../../../eslintrc/typescript';
 import path from 'path';
 import fs from 'fs';
 

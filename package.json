@@ -14,7 +14,7 @@
     "LICENSE",
     "docs",
     "lib",
-    "config",
+    "eslintrc",
     "memo-parser/{*.js,LICENSE,*.md}"
   ],
   "scripts": {

@@ -55,17 +55,17 @@ export const rules = {
 };
 
 export const configs = {
-  recommended: require('../config/recommended'),
+  recommended: require('../eslintrc/recommended'),
 
-  errors: require('../config/errors'),
-  warnings: require('../config/warnings'),
+  errors: require('../eslintrc/errors'),
+  warnings: require('../eslintrc/warnings'),
 
   // shhhh... work in progress "secret" rules
-  'stage-0': require('../config/stage-0'),
+  'stage-0': require('../eslintrc/stage-0'),
 
   // useful stuff for folks using various environments
-  react: require('../config/react'),
-  'react-native': require('../config/react-native'),
-  electron: require('../config/electron'),
-  typescript: require('../config/typescript'),
+  react: require('../eslintrc/react'),
+  'react-native': require('../eslintrc/react-native'),
+  electron: require('../eslintrc/electron'),
+  typescript: require('../eslintrc/typescript'),
 };
